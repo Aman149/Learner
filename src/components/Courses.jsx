@@ -20,7 +20,7 @@ function Courses() {
         <Grid justifyContent={"center"} maxWidth={"100vh"} container spacing={2}>
           {courses.map((course) => (
             <Grid item sm={6} md={4} key={course.title}>
-              <Link to={`/course/${parseInt(course.id)}`}>
+              <Link to={`/course/${course._id}`}>
                 <Course course={course} />
               </Link>
             </Grid>

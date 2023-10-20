@@ -9,6 +9,7 @@ function UpdateCourse() {
     const [title, setTitle] = useState('');
     const [description, setDescription] = useState('');
     const [price, setPrice] = useState(0);
+    console.log(courseId);
 
     const notifySuccess = (message) => {
         toast(message, {
@@ -21,7 +22,7 @@ function UpdateCourse() {
         });
     };
 
-    useEffect(()=> {
+    useEffect(() => {
         fetch('http://localhost:3000/admin/courses', {
             method: 'GET',
             headers: {
@@ -31,23 +32,27 @@ function UpdateCourse() {
         })
         .then(response => response.json())
         .then(data => {
-            const fileredCourse = data.courses.find((c) => c.id === parseInt(courseId))
-            setCourses(fileredCourse);
-            setTitle(fileredCourse.title);
-            setDescription(fileredCourse.description);
-            setPrice(fileredCourse.price);
+            const filteredCourse = data.courses.find(c => c._id === courseId); // Change from c._id.$oid to c._id
+            if (filteredCourse) {
+                setCourses(filteredCourse);
+                setTitle(filteredCourse.title);
+                setDescription(filteredCourse.description);
+                setPrice(filteredCourse.price);
+            } else {
+                console.error('Course not found');
+            }
         })
-    },[])
+    }, []);
 
     function handleUpdateCourse() {
-        fetch(`http://localhost:3000/admin/courses/${courseId}`, {
+        fetch(`http://localhost:3000/admin/courses/${course._id.$oid}`, {
             method: 'PUT',
             headers: {
                 'Content-Type': 'application/json',
                 Authorization: "Bearer " + localStorage.getItem("token")
             },
             body: JSON.stringify({
-                'id': course.id,
+                'id': course._id.$oid,
                 'title': title,
                 'description': description,
                 'price': price,
@@ -61,15 +66,15 @@ function UpdateCourse() {
             else
                 throw new Error('Failed to update course');
         })
-        .then((data)=> {
+        .then((data) => {
             const updatedCourse = {
-                'id': course.id,
+                '_id': { '$oid': course._id.$oid },
                 'title': title,
                 'description': description,
                 'price': price,
                 'published': course.published,
                 'imageLink': course.imageLink
-            }
+            };
             setCourses(updatedCourse);
             notifySuccess(data.message);
         })
